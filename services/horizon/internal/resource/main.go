@@ -5,15 +5,16 @@ package resource
 import (
 	"time"
 
+	"golang.org/x/net/context"
+
 	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/hal"
 	"github.com/stellar/go/services/horizon/internal/resource/base"
 	"github.com/stellar/go/services/horizon/internal/resource/effects"
 	"github.com/stellar/go/services/horizon/internal/resource/operations"
-	"github.com/stellar/go/services/horizon/internal/render/hal"
 	"github.com/stellar/go/strkey"
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/xdr"
-	"golang.org/x/net/context"
 )
 
 // KeyTypeNames maps from strkey version bytes into json string values to use in
@@ -255,7 +256,7 @@ type TradeEffect struct {
 	LedgerCloseTime   time.Time `json:"created_at"`
 }
 
-// Transaction represents trade data aggregation over a period of time
+// TradeAggregation represents trade data aggregation over a period of time
 type TradeAggregation struct {
 	Timestamp     int64     `json:"timestamp"`
 	TradeCount    int64     `json:"trade_count"`
@@ -301,6 +302,7 @@ type Transaction struct {
 	Signatures      []string  `json:"signatures"`
 	ValidAfter      string    `json:"valid_after,omitempty"`
 	ValidBefore     string    `json:"valid_before,omitempty"`
+	Order           int32     `json:"order"`
 }
 
 // TransactionResultCodes represent a summary of result codes returned from

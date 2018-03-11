@@ -3,11 +3,12 @@ package operations
 import (
 	"time"
 
-	"github.com/stellar/go/services/horizon/internal/db2/history"
-	"github.com/stellar/go/services/horizon/internal/resource/base"
-	"github.com/stellar/go/services/horizon/internal/render/hal"
-	"github.com/stellar/go/xdr"
 	"golang.org/x/net/context"
+
+	"github.com/stellar/go/services/horizon/internal/db2/history"
+	"github.com/stellar/go/services/horizon/internal/render/hal"
+	"github.com/stellar/go/services/horizon/internal/resource/base"
+	"github.com/stellar/go/xdr"
 )
 
 // TypeNames maps from operation type to the string used to represent that type
@@ -33,7 +34,6 @@ func New(
 	row history.Operation,
 	ledger history.Ledger,
 ) (result hal.Pageable, err error) {
-
 	base := Base{}
 	base.Populate(ctx, row, ledger)
 
@@ -108,6 +108,7 @@ type Base struct {
 	TypeI           int32     `json:"type_i"`
 	LedgerCloseTime time.Time `json:"created_at"`
 	TransactionHash string    `json:"transaction_hash"`
+	Order           int32     `json:"order"`
 }
 
 // CreateAccount is the json resource representing a single operation whose type

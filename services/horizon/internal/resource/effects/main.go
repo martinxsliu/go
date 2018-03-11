@@ -1,10 +1,11 @@
 package effects
 
 import (
+	"golang.org/x/net/context"
+
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/services/horizon/internal/render/hal"
 	"github.com/stellar/go/services/horizon/internal/resource/base"
-	"golang.org/x/net/context"
 )
 
 var TypeNames = map[history.EffectType]string{
@@ -39,7 +40,6 @@ func New(
 	ctx context.Context,
 	row history.Effect,
 ) (result hal.Pageable, err error) {
-
 	basev := Base{}
 	basev.Populate(ctx, row)
 
@@ -129,11 +129,13 @@ type Base struct {
 		Precedes  hal.Link `json:"precedes"`
 	} `json:"_links"`
 
-	ID      string `json:"id"`
-	PT      string `json:"paging_token"`
-	Account string `json:"account"`
-	Type    string `json:"type"`
-	TypeI   int32  `json:"type_i"`
+	ID          string `json:"id"`
+	PT          string `json:"paging_token"`
+	Account     string `json:"account"`
+	Type        string `json:"type"`
+	TypeI       int32  `json:"type_i"`
+	OperationID string `json:"operation_id"`
+	Order       int32  `json:"order"`
 }
 
 type AccountCreated struct {
