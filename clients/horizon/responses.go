@@ -133,6 +133,7 @@ type Ledger struct {
 		Payments     Link `json:"payments"`
 		Effects      Link `json:"effects"`
 	} `json:"_links"`
+
 	ID               string    `json:"id"`
 	PT               string    `json:"paging_token"`
 	Hash             string    `json:"hash"`
@@ -181,6 +182,7 @@ type TransactionSuccess struct {
 	Links struct {
 		Transaction Link `json:"transaction"`
 	} `json:"_links"`
+
 	Hash   string `json:"hash"`
 	Ledger int32  `json:"ledger"`
 	Env    string `json:"envelope_xdr"`
@@ -208,21 +210,22 @@ type OffersPage struct {
 		Next Link `json:"next"`
 		Prev Link `json:"prev"`
 	} `json:"_links"`
+
 	Embedded struct {
 		Records []Offer `json:"records"`
 	} `json:"_embedded"`
 }
 
 type Payment struct {
-	ID          string `json:"id"`
-	Type        string `json:"type"`
-	PagingToken string `json:"paging_token"`
-
 	Links struct {
 		Transaction struct {
 			Href string `json:"href"`
 		} `json:"transaction"`
 	} `json:"_links"`
+
+	ID          string `json:"id"`
+	Type        string `json:"type"`
+	PagingToken string `json:"paging_token"`
 
 	// create_account fields
 	Account         string `json:"account"`
@@ -273,4 +276,5 @@ type Transaction struct {
 	Signatures      []string  `json:"signatures"`
 	ValidAfter      string    `json:"valid_after,omitempty"`
 	ValidBefore     string    `json:"valid_before,omitempty"`
+	Order           int32     `json:"order"`
 }

@@ -11,9 +11,10 @@ import (
 	"net/url"
 	"sync"
 
+	"golang.org/x/net/context"
+
 	"github.com/stellar/go/build"
 	"github.com/stellar/go/support/errors"
-	"golang.org/x/net/context"
 )
 
 // DefaultTestNetClient is a default client to connect to test network

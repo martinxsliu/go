@@ -10,9 +10,10 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/net/context"
+
 	"github.com/stellar/go/support/errors"
 	"github.com/stellar/go/xdr"
-	"golang.org/x/net/context"
 )
 
 // HomeDomainForAccount returns the home domain for the provided strkey-encoded
@@ -116,10 +117,7 @@ func (c *Client) LoadMemo(p *Payment) (err error) {
 }
 
 // SequenceForAccount implements build.SequenceProvider
-func (c *Client) SequenceForAccount(
-	accountID string,
-) (xdr.SequenceNumber, error) {
-
+func (c *Client) SequenceForAccount(accountID string) (xdr.SequenceNumber, error) {
 	a, err := c.LoadAccount(accountID)
 	if err != nil {
 		return 0, errors.Wrap(err, "load account failed")
