@@ -237,7 +237,7 @@ func (c *Client) stream(ctx context.Context, baseURL string, cursor *Cursor, han
 
 			err := json.Unmarshal(objectBytes, &object)
 			if err != nil {
-				return errors.Wrap(err, "Error unmarshaling objectBytes")
+				return errors.Wrap(err, "error unmarshaling objectBytes")
 			}
 
 			if object.PT != "" {
@@ -257,48 +257,91 @@ func (c *Client) stream(ctx context.Context, baseURL string, cursor *Cursor, han
 
 // StreamLedgers streams incoming ledgers. Use context.WithCancel to stop streaming or
 // context.Background() if you want to stream indefinitely.
-func (c *Client) StreamLedgers(ctx context.Context, cursor *Cursor, handler LedgerHandler) (err error) {
+func (c *Client) StreamLedgers(ctx context.Context, cursor *Cursor, handler LedgerHandler) error {
 	c.fixURLOnce.Do(c.fixURL)
 	url := fmt.Sprintf("%s/ledgers", c.URL)
 	return c.stream(ctx, url, cursor, func(data []byte) error {
-		var ledger Ledger
-		err = json.Unmarshal(data, &ledger)
-		if err != nil {
-			return errors.Wrap(err, "Error unmarshaling data")
+		var l Ledger
+		if err := json.Unmarshal(data, &l); err != nil {
+			return errors.Wrap(err, "error unmarshaling data")
 		}
-		handler(ledger)
+		handler(l)
 		return nil
 	})
 }
 
 // StreamPayments streams incoming payments. Use context.WithCancel to stop streaming or
 // context.Background() if you want to stream indefinitely.
-func (c *Client) StreamPayments(ctx context.Context, accountID string, cursor *Cursor, handler PaymentHandler) (err error) {
+func (c *Client) StreamPayments(ctx context.Context, accountID string, cursor *Cursor, handler PaymentHandler) error {
 	c.fixURLOnce.Do(c.fixURL)
 	url := fmt.Sprintf("%s/accounts/%s/payments", c.URL, accountID)
 	return c.stream(ctx, url, cursor, func(data []byte) error {
-		var payment Payment
-		err = json.Unmarshal(data, &payment)
-		if err != nil {
-			return errors.Wrap(err, "Error unmarshaling data")
+		var p Payment
+		if err := json.Unmarshal(data, &p); err != nil {
+			return errors.Wrap(err, "error unmarshaling data")
 		}
-		handler(payment)
+		handler(p)
 		return nil
 	})
 }
 
-// StreamTransactions streams incoming transactions. Use context.WithCancel to stop streaming or
-// context.Background() if you want to stream indefinitely.
-func (c *Client) StreamTransactions(ctx context.Context, accountID string, cursor *Cursor, handler TransactionHandler) (err error) {
+// StreamAllTransactions streams all incoming transactions. Use context.WithCancel()
+// to stop streaming or context.Background() if you want to stream indefinitely.
+func (c *Client) StreamAllTransactions(ctx context.Context, cursor *Cursor, handler TransactionHandler) error {
+	c.fixURLOnce.Do(c.fixURL)
+	url := fmt.Sprintf("%s/transactions", c.URL)
+	return c.stream(ctx, url, cursor, func(data []byte) error {
+		var t Transaction
+		if err := json.Unmarshal(data, &t); err != nil {
+			return errors.Wrap(err, "error unmarshaling data")
+		}
+		handler(t)
+		return nil
+	})
+}
+
+// StreamTransactions streams incoming transactions for a given account. Use
+// context.WithCancel() to stop streaming or context.Background() if you want
+// to stream indefinitely.
+func (c *Client) StreamTransactions(ctx context.Context, accountID string, cursor *Cursor, handler TransactionHandler) error {
 	c.fixURLOnce.Do(c.fixURL)
 	url := fmt.Sprintf("%s/accounts/%s/transactions", c.URL, accountID)
 	return c.stream(ctx, url, cursor, func(data []byte) error {
-		var transaction Transaction
-		err = json.Unmarshal(data, &transaction)
-		if err != nil {
-			return errors.Wrap(err, "Error unmarshaling data")
+		var t Transaction
+		if err := json.Unmarshal(data, &t); err != nil {
+			return errors.Wrap(err, "error unmarshaling data")
 		}
-		handler(transaction)
+		handler(t)
+		return nil
+	})
+}
+
+// StreamAllOperations streams all incoming operations. Use context.WithCancel()
+// to stop streaming or context.Background() if you want to stream indefinitely.
+func (c *Client) StreamAllOperations(ctx context.Context, cursor *Cursor, handler OperationHandler) error {
+	c.fixURLOnce.Do(c.fixURL)
+	url := fmt.Sprintf("%s/operations", c.URL)
+	return c.stream(ctx, url, cursor, func(data []byte) error {
+		op, err := UnmarshalOperation(data)
+		if err != nil {
+			return errors.Wrap(err, "error unmarshaling data")
+		}
+		handler(op)
+		return nil
+	})
+}
+
+// StreamAllEffects streams all incoming effects. Use context.WithCancel()
+// to stop streaming or context.Background() if you want to stream indefinitely.
+func (c *Client) StreamAllEffects(ctx context.Context, cursor *Cursor, handler EffectHandler) error {
+	c.fixURLOnce.Do(c.fixURL)
+	url := fmt.Sprintf("%s/effects", c.URL)
+	return c.stream(ctx, url, cursor, func(data []byte) error {
+		effect, err := UnmarshalEffect(data)
+		if err != nil {
+			return errors.Wrap(err, "error unmarshaling data")
+		}
+		handler(effect)
 		return nil
 	})
 }

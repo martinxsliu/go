@@ -67,9 +67,27 @@ func (m *MockClient) StreamPayments(ctx context.Context, accountID string, curso
 	return a.Error(0)
 }
 
+// StreamAllTransactions is a mocking a method
+func (m *MockClient) StreamAllTransactions(ctx context.Context, cursor *Cursor, handler TransactionHandler) error {
+	a := m.Called(ctx, cursor, handler)
+	return a.Error(0)
+}
+
 // StreamTransactions is a mocking a method
 func (m *MockClient) StreamTransactions(ctx context.Context, accountID string, cursor *Cursor, handler TransactionHandler) error {
 	a := m.Called(ctx, accountID, cursor, handler)
+	return a.Error(0)
+}
+
+// StreamAllOperations is a mocking a method
+func (m *MockClient) StreamAllOperations(ctx context.Context, cursor *Cursor, handler OperationHandler) error {
+	a := m.Called(ctx, cursor, handler)
+	return a.Error(0)
+}
+
+// StreamAllEffects is a mocking a method
+func (m *MockClient) StreamAllEffects(ctx context.Context, cursor *Cursor, handler EffectHandler) error {
+	a := m.Called(ctx, cursor, handler)
 	return a.Error(0)
 }
 

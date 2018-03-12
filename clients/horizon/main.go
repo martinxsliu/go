@@ -78,7 +78,10 @@ type ClientInterface interface {
 	LoadOrderBook(selling Asset, buying Asset, params ...interface{}) (orderBook OrderBookSummary, err error)
 	StreamLedgers(ctx context.Context, cursor *Cursor, handler LedgerHandler) error
 	StreamPayments(ctx context.Context, accountID string, cursor *Cursor, handler PaymentHandler) error
+	StreamAllTransactions(ctx context.Context, cursor *Cursor, handler TransactionHandler) error
 	StreamTransactions(ctx context.Context, accountID string, cursor *Cursor, handler TransactionHandler) error
+	StreamAllOperations(ctx context.Context, cursor *Cursor, handler OperationHandler) error
+	StreamAllEffects(ctx context.Context, cursor *Cursor, handler EffectHandler) error
 	SubmitTransaction(txeBase64 string) (TransactionSuccess, error)
 }
 
@@ -103,6 +106,12 @@ type PaymentHandler func(Payment)
 
 // TransactionHandler is a function that is called when a new transaction is received
 type TransactionHandler func(Transaction)
+
+// OperationHandler is a function that is called when a new operation is received
+type OperationHandler func(Operation)
+
+// EffectHandler is a function that is called when a new effect is received
+type EffectHandler func(Effect)
 
 // ensure that the horizon client can be used as a SequenceProvider
 var _ build.SequenceProvider = &Client{}

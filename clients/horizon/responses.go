@@ -228,7 +228,7 @@ type Payment struct {
 	Account         string `json:"account"`
 	StartingBalance string `json:"starting_balance"`
 
-	// payment/path_payment fields
+	// payment, path_payment fields
 	From        string `json:"from"`
 	To          string `json:"to"`
 	AssetType   string `json:"asset_type"`
@@ -255,6 +255,16 @@ type PriceLevel struct {
 }
 
 type Transaction struct {
+	Links struct {
+		Self       Link `json:"self"`
+		Account    Link `json:"account"`
+		Ledger     Link `json:"ledger"`
+		Operations Link `json:"operations"`
+		Effects    Link `json:"effects"`
+		Precedes   Link `json:"precedes"`
+		Succeeds   Link `json:"succeeds"`
+	} `json:"_links"`
+
 	ID              string    `json:"id"`
 	PagingToken     string    `json:"paging_token"`
 	Hash            string    `json:"hash"`
