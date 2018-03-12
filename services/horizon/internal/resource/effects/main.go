@@ -1,10 +1,12 @@
 package effects
 
 import (
+	"golang.org/x/net/context"
+
 	"github.com/stellar/go/services/horizon/internal/db2/history"
 	"github.com/stellar/go/services/horizon/internal/render/hal"
 	"github.com/stellar/go/services/horizon/internal/resource/base"
-	"golang.org/x/net/context"
+	"github.com/stellar/go/support/errors"
 )
 
 var TypeNames = map[history.EffectType]string{
@@ -35,11 +37,7 @@ var TypeNames = map[history.EffectType]string{
 
 // New creates a new effect resource from the provided database representation
 // of the effect.
-func New(
-	ctx context.Context,
-	row history.Effect,
-) (result hal.Pageable, err error) {
-
+func New(ctx context.Context, row history.Effect) (result hal.Pageable, err error) {
 	basev := Base{}
 	basev.Populate(ctx, row)
 
@@ -66,6 +64,10 @@ func New(
 		result = e
 	case history.EffectAccountFlagsUpdated:
 		e := AccountFlagsUpdated{Base: basev}
+		err = row.UnmarshalDetails(&e)
+		result = e
+	case history.EffectAccountInflationDestinationUpdated:
+		e := AccountInflationDestinationUpdated{Base: basev}
 		err = row.UnmarshalDetails(&e)
 		result = e
 	case history.EffectSignerCreated:
@@ -104,21 +106,32 @@ func New(
 		e := Trade{Base: basev}
 		err = row.UnmarshalDetails(&e)
 		result = e
+	case history.EffectDataCreated:
+		e := DataCreated{Base: basev}
+		err = row.UnmarshalDetails(&e)
+		result = e
+	case history.EffectDataRemoved:
+		e := DataRemoved{Base: basev}
+		err = row.UnmarshalDetails(&e)
+		result = e
+	case history.EffectDataUpdated:
+		e := DataUpdated{Base: basev}
+		err = row.UnmarshalDetails(&e)
+		result = e
 	default:
 		result = basev
 	}
-
 	if err != nil {
-		return
+		return nil, errors.Wrap(err, "error unmarshaling details into effect")
 	}
 
-	rh, ok := result.(base.Rehydratable)
-
-	if ok {
-		err = rh.Rehydrate()
+	if rh, ok := result.(base.Rehydratable); ok {
+		if err := rh.Rehydrate(); err != nil {
+			return nil, errors.Wrap(err, "error rehydrating effect")
+		}
 	}
 
-	return
+	return result, nil
 }
 
 // Base provides the common structure for any effect resource effect.
@@ -169,6 +182,12 @@ type AccountFlagsUpdated struct {
 	Base
 	AuthRequired  *bool `json:"auth_required_flag,omitempty"`
 	AuthRevokable *bool `json:"auth_revokable_flag,omitempty"`
+	AuthImmutable *bool `json:"auth_immutable_flag,omitempty"`
+}
+
+type AccountInflationDestinationUpdated struct {
+	Base
+	InflationDestination string `json:"inflation_destination"`
 }
 
 type SignerCreated struct {
@@ -180,7 +199,6 @@ type SignerCreated struct {
 
 type SignerRemoved struct {
 	Base
-	Weight    int32  `json:"weight"`
 	PublicKey string `json:"public_key"`
 	Key       string `json:"key"`
 }
@@ -212,16 +230,14 @@ type TrustlineUpdated struct {
 
 type TrustlineAuthorized struct {
 	Base
-	Trustor   string `json:"trustor"`
-	AssetType string `json:"asset_type"`
-	AssetCode string `json:"asset_code,omitempty"`
+	base.Asset
+	Trustor string `json:"trustor"`
 }
 
 type TrustlineDeauthorized struct {
 	Base
-	Trustor   string `json:"trustor"`
-	AssetType string `json:"asset_type"`
-	AssetCode string `json:"asset_code,omitempty"`
+	base.Asset
+	Trustor string `json:"trustor"`
 }
 
 type Trade struct {
@@ -236,6 +252,23 @@ type Trade struct {
 	BoughtAssetType   string `json:"bought_asset_type"`
 	BoughtAssetCode   string `json:"bought_asset_code,omitempty"`
 	BoughtAssetIssuer string `json:"bought_asset_issuer,omitempty"`
+}
+
+type DataCreated struct {
+	Base
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type DataRemoved struct {
+	Base
+	Name string `json:"name"`
+}
+
+type DataUpdated struct {
+	Base
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 // interface implementations
